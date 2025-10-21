@@ -1,0 +1,55 @@
+name: Build liboqs on Linux
+
+on:
+  push:
+    branches:
+      - main  # Trigger on pushes to the main branch (or adjust as needed)
+  pull_request:
+    branches:
+      - main  # Trigger on PRs to the main branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Use the latest Ubuntu runner
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3  # Check out the code from the repository
+
+    - name: Set up CMake
+      uses: scivision/setup-cmake@v1
+      with:
+        cmake-version: '3.21'  # Specify the CMake version, adjust as necessary
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          ninja-build \
+          libssl-dev  # Add any dependencies that are required for your project
+
+    - name: Build liboqs
+      run: |
+        mkdir build
+        cd build
+        cmake .. -G "Ninja" -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
+        ninja
+
+    - name: Upload Build Artifacts
+      if: success()  # Only upload artifacts if the build was successful
+      uses: actions/upload-artifact@v3
+      with:
+        name: liboqs-build
+        path: |
+          build/liboqs.dll  # Adjust the path to match where your .dll or .so files are located
+          build/liboqs.so   # Adjust this if you're building on Linux and expect .so files
+          build/*.dll       # This will also match any .dll files in the build directory
+          build/*.so        # Similarly, match any .so files in the build directory
+
+    - name: Run Tests
+      if: success() && !contains(github.event.head_commit.message, '[skip ci]')  # Only run tests if the build is successful
+      run: |
+        cd build
+        ninja test  # Adjust if you're using a different test command
