@@ -7,7 +7,7 @@ on:
   pull_request:
     branches:
       - main  # Trigger on PRs to the main branch
-  workflow_dispatch:  # Add this to allow manual triggers
+  workflow_dispatch:  # Allow manual trigger
 
 jobs:
   build:
@@ -15,10 +15,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v3  # Check out the code from the repository
+      uses: actions/checkout@v3  # Use the latest version of checkout
 
     - name: Set up CMake
-      uses: scivision/setup-cmake@v1
+      uses: actions/setup-cmake@v3  # Use the latest version of the official setup-cmake action
       with:
         cmake-version: '3.21'  # Specify the CMake version, adjust as necessary
 
@@ -39,8 +39,8 @@ jobs:
         ninja
 
     - name: Upload Build Artifacts
-      if: success()
-      uses: actions/upload-artifact@v3
+      if: success()  # Only upload artifacts if the build was successful
+      uses: actions/upload-artifact@v4  # Use the latest version of upload-artifact
       with:
         name: liboqs-build
         path: |
