@@ -3,10 +3,11 @@ name: Build liboqs on Linux
 on:
   push:
     branches:
-      - main  # Trigger on pushes to the main branch (or adjust as needed)
+      - main  # Trigger on pushes to the main branch
   pull_request:
     branches:
       - main  # Trigger on PRs to the main branch
+  workflow_dispatch:  # Add this to allow manual triggers
 
 jobs:
   build:
@@ -38,18 +39,16 @@ jobs:
         ninja
 
     - name: Upload Build Artifacts
-      if: success()  # Only upload artifacts if the build was successful
+      if: success()
       uses: actions/upload-artifact@v3
       with:
         name: liboqs-build
         path: |
-          build/liboqs.dll  # Adjust the path to match where your .dll or .so files are located
-          build/liboqs.so   # Adjust this if you're building on Linux and expect .so files
-          build/*.dll       # This will also match any .dll files in the build directory
-          build/*.so        # Similarly, match any .so files in the build directory
+          build/liboqs.so
+          build/liboqs.dll
 
     - name: Run Tests
-      if: success() && !contains(github.event.head_commit.message, '[skip ci]')  # Only run tests if the build is successful
+      if: success()
       run: |
         cd build
-        ninja test  # Adjust if you're using a different test command
+        ninja test
